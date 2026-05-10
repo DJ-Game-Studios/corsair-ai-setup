@@ -12,7 +12,7 @@ SSH keys provide:
 
 ## Prerequisites
 
-- Ubuntu 24.04 LTS installed
+- Ubuntu 26.04 installed
 - SSH server installed (from OS installation guide)
 - Tailscale configured (for remote access)
 - Access to existing SSH keys from other nodes

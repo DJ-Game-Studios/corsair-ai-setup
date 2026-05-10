@@ -1,29 +1,29 @@
 # OS Installation Guide
 
-Ubuntu 24.04 LTS installation for the Corsair AI workstation (AMD Ryzen AI Max+ 395).
+Ubuntu 26.04 installation for the Corsair AI workstation (AMD Ryzen AI Max+ 395).
 
 ## Prerequisites
 
-- Ubuntu 24.04 LTS ISO image
+- Ubuntu 26.04 ISO image
 - USB flash drive (8GB+)
 - Another computer to create the bootable media
 - Stable internet connection during installation
 
-## Why Ubuntu 24.04 LTS?
+## Why Ubuntu 26.04?
 
-- **ROCm Support:** Ubuntu 24.04 LTS has the best ROCm (AMD GPU driver) support
-- **Long-term Support:** 5 years of security updates (until 2029)
-- **Modern Kernel:** Linux 6.x with better AMD GPU support
+- **ROCm Support:** Ubuntu 26.04 has excellent ROCm (AMD GPU driver) support
+- **Fleet Consistency:** Matches other nodes (Node-1, Node-2) running Ubuntu 26.04
+- **Modern Kernel:** Linux 7.x with better AMD GPU support
 - **Package Availability:** Latest versions of AI/ML tools in repositories
 
-## Step 1: Download Ubuntu 24.04 LTS
+## Step 1: Download Ubuntu 26.04
 
 ```bash
-# Download the latest Ubuntu 24.04 LTS ISO
-wget https://releases.ubuntu.com/24.04/ubuntu-24.04.3-desktop-amd64.iso
+# Download the latest Ubuntu 26.04 ISO
+wget https://releases.ubuntu.com/26.04/ubuntu-26.04-desktop-amd64.iso
 
 # Verify the download (optional but recommended)
-sha256sum ubuntu-24.04.3-desktop-amd64.iso
+sha256sum ubuntu-26.04-desktop-amd64.iso
 ```
 
 ## Step 2: Create Bootable USB
@@ -41,7 +41,7 @@ Or using **dd** (Linux/macOS):
 lsblk
 
 # Flash the ISO (replace /dev/sdX with your USB device)
-sudo dd if=ubuntu-24.04.3-desktop-amd64.iso of=/dev/sdX bs=4M status=progress conv=fdatasync
+sudo dd if=ubuntu-26.04-desktop-amd64.iso of=/dev/sdX bs=4M status=progress conv=fdatasync
 
 # Sync and eject
 sync
@@ -254,7 +254,7 @@ If network configuration fails:
 
 ## Additional Resources
 
-- [Ubuntu 24.04 LTS Release Notes](https://discourse.ubuntu.com/t/ubuntu-24-04-lts-noble-numbat-release-notes/38285)
+- [Ubuntu Release Notes](https://discourse.ubuntu.com/)
 - [AMD ROCm Installation Guide](https://rocm.docs.amd.com/)
 - [Ubuntu Server Guide](https://ubuntu.com/server/docs)
 

@@ -11,7 +11,7 @@ ROCm is AMD's open-source software platform for GPU-accelerated computing. It pr
 
 ## Prerequisites
 
-- Ubuntu 24.04 LTS installed
+- Ubuntu 26.04 installed
 - AMD GPU detected (Radeon 8060S / RDNA 3.5)
 - Sudo access
 - Stable internet connection

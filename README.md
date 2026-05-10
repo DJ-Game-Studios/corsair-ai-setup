@@ -30,7 +30,7 @@ corsair-ai-setup/
 ├── README.md                 # This file
 ├── Makefile                  # Convenient commands for setup tasks
 ├── docs/                     # Detailed documentation
-│   ├── os-installation.md    # Ubuntu 24.04 LTS installation
+│   ├── os-installation.md    # Ubuntu 26.04 installation
 │   ├── rocm-setup.md         # ROCm driver installation
 │   ├── ollama-setup.md       # Ollama installation and configuration
 │   ├── tailscale-setup.md    # Tailscale mesh network setup
@@ -55,7 +55,7 @@ corsair-ai-setup/
 
 ## Setup Checklist
 
-- [ ] **OS Installation**: Install Ubuntu 24.04 LTS (see `docs/os-installation.md`)
+- [ ] **OS Installation**: Install Ubuntu 26.04 (see `docs/os-installation.md`)
 - [ ] **System Update**: `sudo apt update && sudo apt upgrade -y`
 - [ ] **ROCm Installation**: Install AMD GPU drivers (see `docs/rocm-setup.md`)
 - [ ] **Tailscale Setup**: Join the fleet mesh network (see `docs/tailscale-setup.md`)

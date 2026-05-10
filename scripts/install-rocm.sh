@@ -16,15 +16,15 @@ if [ "$EUID" -eq 0 ]; then
     exit 1
 fi
 
-# Check if Ubuntu 24.04
+# Check if Ubuntu 26.04
 if [ ! -f /etc/os-release ]; then
     echo "Cannot detect OS version. Exiting."
     exit 1
 fi
 
 source /etc/os-release
-if [ "$ID" != "ubuntu" ] || [ ! "$VERSION_ID" =~ "24.04" ]; then
-    echo "Warning: This script is designed for Ubuntu 24.04 LTS."
+if [ "$ID" != "ubuntu" ] || [ ! "$VERSION_ID" =~ "26.04" ]; then
+    echo "Warning: This script is designed for Ubuntu 26.04."
     echo "Current OS: $PRETTY_NAME"
     read -p "Continue anyway? (y/N): " -n 1 -r
     echo

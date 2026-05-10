@@ -13,7 +13,7 @@ Tailscale provides:
 
 ## Prerequisites
 
-- Ubuntu 24.04 LTS installed
+- Ubuntu 26.04 installed
 - Tailscale account (already set up for the fleet)
 - Sudo access
 - Stable internet connection

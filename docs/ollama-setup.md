@@ -12,7 +12,7 @@ Ollama is a powerful tool for running large language models locally with:
 
 ## Prerequisites
 
-- Ubuntu 24.04 LTS installed
+- Ubuntu 26.04 installed
 - ROCm installed and GPU detected (see `docs/rocm-setup.md`)
 - External storage mounted (SEA-ARC-6TB at `/run/media/dj/SEA-ARC-6TB/ai-models`)
 - Sudo access

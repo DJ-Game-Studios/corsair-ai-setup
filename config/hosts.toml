@@ -6,7 +6,7 @@ name = "corsair-ai-workstation"
 formal_name = "DJ-Linux-GPU_Node-6"
 hostname = "dj-linux-gpu-node-6-strixhalo"
 username = "dj-linux-gpu-node-6"
-os = "Ubuntu 24.04 LTS"
+os = "Ubuntu 26.04"
 status = "PLANNED"
 location = "TBD"
 
