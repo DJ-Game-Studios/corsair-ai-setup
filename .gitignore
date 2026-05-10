@@ -1,0 +1,38 @@
+# Environment variables
+.env
+*.env.local
+
+# Temporary files
+*.tmp
+*.log
+/tmp/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Model storage (don't commit actual models)
+*.gguf
+*.bin
+*.safetensors
+
+# Test artifacts
+test_hip
+test_hip.cpp

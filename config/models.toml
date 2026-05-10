@@ -1,0 +1,113 @@
+# Model Registry for Corsair AI Workstation
+# Planned models and their configuration
+
+[models.qwen2.5-72b]
+name = "qwen2.5:72b"
+parameters = "72B"
+size_gb = 40
+purpose = "Primary inference, research"
+priority = "high"
+downloaded = false
+quantization = "Q4_K_M"
+context_length = 32768
+gpu_memory_required = "40 GB"
+
+[models.qwen2.5-14b]
+name = "qwen2.5:14b"
+parameters = "14B"
+size_gb = 8
+purpose = "Development, testing"
+priority = "high"
+downloaded = false
+quantization = "Q4_K_M"
+context_length = 32768
+gpu_memory_required = "8 GB"
+
+[models.llama3-70b]
+name = "llama3:70b"
+parameters = "70B"
+size_gb = 40
+purpose = "Alternative flagship, Meta ecosystem"
+priority = "high"
+downloaded = false
+quantization = "Q4_K_M"
+context_length = 8192
+gpu_memory_required = "40 GB"
+
+[models.stable-diffusion-xl]
+name = "stable-diffusion-xl"
+parameters = "3.5B"
+size_gb = 7
+purpose = "Image generation"
+priority = "medium"
+downloaded = false
+quantization = "N/A"
+context_length = "N/A"
+gpu_memory_required = "7 GB"
+
+[models.mistral-7b]
+name = "mistral:7b"
+parameters = "7B"
+size_gb = 4
+purpose = "Lightweight inference"
+priority = "medium"
+downloaded = false
+quantization = "Q4_K_M"
+context_length = 8192
+gpu_memory_required = "4 GB"
+
+[models.codellama-34b]
+name = "codellama:34b"
+parameters = "34B"
+size_gb = 20
+purpose = "Code generation"
+priority = "low"
+downloaded = false
+quantization = "Q4_K_M"
+context_length = 16384
+gpu_memory_required = "20 GB"
+
+[models.qwen2.5-0.5b]
+name = "qwen2.5:0.5b"
+parameters = "0.5B"
+size_gb = 0.3
+purpose = "Quick testing, validation"
+priority = "high"
+downloaded = false
+quantization = "Q4_K_M"
+context_length = 32768
+gpu_memory_required = "0.3 GB"
+
+[models.qwen2.5-1b]
+name = "qwen2.5:1b"
+parameters = "1B"
+size_gb = 0.6
+purpose = "Basic testing"
+priority = "medium"
+downloaded = false
+quantization = "Q4_K_M"
+context_length = 32768
+gpu_memory_required = "0.6 GB"
+
+[storage]
+base_path = "/run/media/dj/SEA-ARC-6TB/ai-models"
+total_capacity_gb = 6000
+available_capacity_gb = 6000
+used_capacity_gb = 0
+
+[ollama]
+version = "latest"
+gpu_acceleration = "rocm"
+num_gpu_layers = 99
+context_size = 8192
+batch_size = 512
+
+[download_strategy]
+priority_order = ["high", "medium", "low"]
+parallel_downloads = 1
+verify_integrity = true
+
+[metadata]
+registry_version = "1.0"
+created = "2026-05-10"
+last_updated = "2026-05-10"

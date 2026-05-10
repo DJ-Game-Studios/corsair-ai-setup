@@ -1,0 +1,60 @@
+# SSH Configuration Template for Corsai AI Workstation
+# Copy this to ~/.ssh/config and customize as needed
+
+# Fleet Nodes
+Host main-pc
+    HostName main-pc
+    User dj
+    IdentityFile ~/.ssh/id_ed25519
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+
+Host mac-pro
+    HostName mac-pro
+    User dj
+    IdentityFile ~/.ssh/id_ed25519
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+
+Host macbook
+    HostName macbook
+    User dj
+    IdentityFile ~/.ssh/id_ed25519
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+
+# This Node (Corsair AI Workstation)
+Host dj-linux-gpu-node-6
+    HostName dj-linux-gpu-node-6
+    User dj-linux-gpu-node-6
+    IdentityFile ~/.ssh/id_ed25519
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+
+Host corsair-ai
+    HostName dj-linux-gpu-node-6
+    User dj-linux-gpu-node-6
+    IdentityFile ~/.ssh/id_ed25519
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+
+# GitHub/GitLab (if using SSH for Git operations)
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519_github
+    StrictHostKeyChecking no
+
+# Tailscale Nodes (if using Tailscale hostnames)
+Host *.tailnet-name
+    HostName %h.tailnet-name.ts.net
+    User dj
+    IdentityFile ~/.ssh/id_ed25519
+    StrictHostKeyChecking no
+
+# Common Settings
+Host *
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    Compression yes
+    ConnectTimeout 10

@@ -1,0 +1,97 @@
+# Host Configuration for Corsair AI Workstation
+# Node-6: DJ-Linux-GPU_Node-6
+
+[host]
+name = "corsair-ai-workstation"
+formal_name = "DJ-Linux-GPU_Node-6"
+hostname = "dj-linux-gpu-node-6-strixhalo"
+username = "dj-linux-gpu-node-6"
+os = "Ubuntu 24.04 LTS"
+status = "PLANNED"
+location = "TBD"
+
+[hardware.cpu]
+model = "AMD Ryzen AI Max+ 395 (Strix Halo)"
+cores = 16
+threads = 32
+max_frequency = "5.1 GHz"
+architecture = "Zen 5"
+
+[hardware.gpu]
+model = "AMD Radeon 8060S (RDNA 3.5)"
+compute_units = 40
+stream_processors = 2560
+architecture = "RDNA 3.5"
+memory_type = "Unified"
+
+[hardware.npu]
+model = "AMD XDNA 2"
+tops = 50
+purpose = "AI acceleration"
+
+[hardware.memory]
+total = "128 GB"
+type = "LPDDR5x-8000"
+gpu_allocatable_max = "112 GB"
+architecture = "Unified"
+
+[storage.internal]
+# To be determined based on drive selection
+
+[storage.external]
+mount_point = "/run/media/dj/SEA-ARC-6TB"
+drive_id = "ext-seagate-expansion-6tb"
+capacity = "6 TB"
+filesystem = "exFAT"
+purpose = "AI model storage"
+
+[network]
+local_ip = "TBD"
+tailscale_ip = "TBD"
+ssh_port = 22
+tailscale_ssh = true
+
+[software.rocm]
+version = "6.0"
+status = "PLANNED"
+purpose = "AMD GPU acceleration"
+
+[software.ollama]
+version = "latest"
+status = "PLANNED"
+purpose = "LLM runtime"
+models_path = "/run/media/dj/SEA-ARC-6TB/ai-models"
+gpu_acceleration = "rocm"
+
+[software.tailscale]
+status = "PLANNED"
+purpose = "Mesh network"
+ssh = true
+
+[software.ssh]
+status = "PLANNED"
+port = 22
+key_type = "ed25519"
+password_auth = false
+
+[software.python]
+version = "3.x"
+frameworks = ["PyTorch (ROCm)", "TensorFlow (ROCm)", "scikit-learn"]
+
+[monitoring]
+health_check_script = "./scripts/health-check.sh"
+test_scripts = [
+    "./tests/test-gpu.sh",
+    "./tests/test-ollama.sh",
+    "./tests/test-network.sh"
+]
+
+[related_repos]
+local_ai = "local-ai/configs/hosts/corsair-ai-workstation/"
+master_track = "master-track/data/nodes.json (id: corsair-ai-workstation)"
+dj_nodes = "dj-nodes/DJ-Linux-GPU_Node-6/"
+
+[metadata]
+created = "2026-05-10"
+last_updated = "2026-05-10"
+setup_repo = "https://github.com/djmsqrvve/corsair-ai-setup.git"
