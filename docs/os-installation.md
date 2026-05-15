@@ -204,7 +204,7 @@ sudo apt install -y git
 
 # Clone the corsair-ai-setup repository
 cd ~
-git clone https://github.com/djmsqrvve/corsair-ai-setup.git
+git clone https://github.com/DJ-Game-Studios/corsair-ai-setup.git
 
 # Navigate to the repository
 cd corsair-ai-setup

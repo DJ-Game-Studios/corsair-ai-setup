@@ -10,7 +10,7 @@ Dedicated setup and configuration repository for the Corsair AI workstation (Nod
 
 ```bash
 # Clone this repo on the new workstation
-git clone https://github.com/djmsqrvve/corsair-ai-setup.git
+git clone https://github.com/DJ-Game-Studios/corsair-ai-setup.git
 cd corsair-ai-setup
 
 # Run the full setup
