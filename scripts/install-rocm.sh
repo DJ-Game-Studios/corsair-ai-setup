@@ -1,7 +1,23 @@
 #!/bin/bash
-
 # ROCm Installation Script for Corsair AI Workstation
-# AMD Ryzen AI Max+ 395 with Radeon 8060S (RDNA 3.5)
+# AMD Ryzen AI Max+ 395 with Radeon 8060S (RDNA 3.5, gfx1151) on Ubuntu 26.04 (resolute)
+#
+# This procedure was verified end-to-end on Node-6 2026-05-15 with ROCm 7.2.3.
+# History: the original v1 of this script used `apt-key add` (deprecated since 22.04)
+# and pinned ROCm 6.0 + the generic `ubuntu main` suite. Both fail on 26.04, and
+# 6.0 predates gfx1151 support anyway (Strix Halo needs ≥ 7.2.2).
+#
+# Path that works on 26.04:
+#   - keyring via signed-by (no apt-key)
+#   - AMD's /latest pointer over their noble (24.04 LTS) suite — resolute repo is
+#     not yet published; noble ABI is compatible because we use the 26.04 inbox
+#     amdgpu driver, not AMD's separate DKMS
+#   - install the `rocm` meta-package (pulls the full stack incl. rocBLAS gfx1151
+#     Tensile kernels)
+#   - usermod -aG video,render
+#
+# See also: dj-nodes/docs/runbooks/sunshine-setup.md for the same "use noble on
+# resolute" pattern (Tailscale + Sunshine both required it).
 
 set -e
 
@@ -10,123 +26,124 @@ echo "ROCm Installation Script"
 echo "=========================================="
 echo ""
 
-# Check if running as root
+# Don't run as root — sudo is used selectively
 if [ "$EUID" -eq 0 ]; then
     echo "Please do not run this script as root. Use sudo for specific commands."
     exit 1
 fi
 
-# Check if Ubuntu 26.04
-if [ ! -f /etc/os-release ]; then
-    echo "Cannot detect OS version. Exiting."
-    exit 1
-fi
-
-source /etc/os-release
-if [ "$ID" != "ubuntu" ] || [ ! "$VERSION_ID" =~ "26.04" ]; then
-    echo "Warning: This script is designed for Ubuntu 26.04."
-    echo "Current OS: $PRETTY_NAME"
-    read -p "Continue anyway? (y/N): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
+# Sanity: Ubuntu, 26.04 expected (works on 24.04 too via the same noble repo)
+if [ -f /etc/os-release ]; then
+    source /etc/os-release
+    if [ "$ID" != "ubuntu" ]; then
+        echo "Warning: $PRETTY_NAME is not Ubuntu. This script targets Ubuntu 24.04/26.04."
+        read -p "Continue anyway? (y/N): " -n 1 -r
+        echo
+        [[ ! $REPLY =~ ^[Yy]$ ]] && exit 1
     fi
 fi
 
 # Step 1: Verify GPU detection
-echo "Step 1: Verifying GPU detection..."
-if ! lspci | grep -qi vga; then
-    echo "Error: No GPU detected. Please check hardware."
-    exit 1
-fi
-
-GPU_INFO=$(lspci | grep -i vga)
-echo "GPU detected: $GPU_INFO"
+echo "Step 1: GPU detection"
+lspci | grep -iE "vga|display|3d" || { echo "Error: No GPU detected."; exit 1; }
 echo ""
 
-# Step 2: Add AMD ROCm repository
-echo "Step 2: Adding AMD ROCm repository..."
-wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | sudo apt-key add -
-echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/6.0/ ubuntu main' | sudo tee /etc/apt/sources.list.d/rocm.list
-sudo apt update
+# Step 2: Keyring (signed-by — the modern path; `apt-key add` is deprecated)
+echo "Step 2: AMD ROCm signing key → /etc/apt/keyrings/rocm.gpg"
+sudo install -d /etc/apt/keyrings
+wget -qO- https://repo.radeon.com/rocm/rocm.gpg.key \
+    | gpg --dearmor \
+    | sudo tee /etc/apt/keyrings/rocm.gpg > /dev/null
+echo "  ok"
 echo ""
 
-# Step 3: Install ROCm
-echo "Step 3: Installing ROCm packages..."
-sudo apt install -y rocm-dev rocm-libs rocm-utils
+# Step 3: Apt source — AMD's /latest pointer over noble (works on resolute too)
+echo "Step 3: Apt source → /etc/apt/sources.list.d/rocm.list"
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/latest noble main" \
+    | sudo tee /etc/apt/sources.list.d/rocm.list > /dev/null
+cat /etc/apt/sources.list.d/rocm.list
+echo ""
+echo "Note: pin to a specific version (e.g. /rocm/apt/7.2/ or /rocm/apt/7.2.3/) if"
+echo "you want apt update to NOT auto-track ROCm major releases."
 echo ""
 
-# Step 4: Configure user permissions
-echo "Step 4: Configuring user permissions..."
-sudo usermod -a -G render,video $USER
-echo "Added user $USER to render and video groups."
-echo "IMPORTANT: You must log out and log back in for group changes to take effect."
+# Step 4: Pin AMD repo above universe alternatives
+echo "Step 4: Apt pin priority 600 for repo.radeon.com"
+sudo tee /etc/apt/preferences.d/rocm-pin-600 > /dev/null <<'EOF'
+Package: *
+Pin: release o=repo.radeon.com
+Pin-Priority: 600
+EOF
+echo "  ok"
 echo ""
 
-# Step 5: Set environment variables
-echo "Step 5: Setting environment variables..."
-if ! grep -q "rocm/bin" ~/.bashrc; then
-    echo 'export PATH=$PATH:/opt/rocm/bin:/opt/rocm/opencl/bin' >> ~/.bashrc
-    echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/rocm/lib' >> ~/.bashrc
-    echo 'export CPATH=$CPATH:/opt/rocm/include' >> ~/.bashrc
-    echo "Added ROCm paths to ~/.bashrc"
+# Step 5: User → video + render (re-login required for shell groups to update)
+echo "Step 5: Add $USER to video,render groups"
+sudo usermod -aG video,render "$USER"
+echo "  ok — re-login (or 'newgrp render') for the current shell to see the new groups."
+echo ""
+
+# Step 6: apt update + install rocm meta-package
+echo "Step 6: apt update + install rocm (this is the heavy step; multi-GB download)"
+sudo apt-get update
+DEBIAN_FRONTEND=noninteractive sudo apt-get install -y rocm
+echo ""
+
+# Step 7: ROCm env on PATH (idempotent — only adds if not already there)
+echo "Step 7: ROCm PATH + LD_LIBRARY_PATH in ~/.shell_env (or fallback ~/.bashrc)"
+TARGET="$HOME/.shell_env"
+[ -f "$TARGET" ] || TARGET="$HOME/.bashrc"
+if ! grep -q "rocm/bin" "$TARGET" 2>/dev/null; then
+    {
+        echo ""
+        echo "# ROCm — added by corsair-ai-setup/scripts/install-rocm.sh"
+        echo 'export PATH="/opt/rocm/bin:$PATH"'
+        echo 'export LD_LIBRARY_PATH="/opt/rocm/lib:${LD_LIBRARY_PATH:-}"'
+    } >> "$TARGET"
+    echo "  appended to $TARGET"
 else
-    echo "ROCm paths already in ~/.bashrc"
+    echo "  already present in $TARGET"
 fi
 echo ""
 
-# Step 6: Set performance environment variables
-echo "Step 6: Setting performance tuning variables..."
-if ! grep -q "HIP_VISIBLE_DEVICES" ~/.bashrc; then
-    echo 'export HIP_VISIBLE_DEVICES=0' >> ~/.bashrc
-    echo 'export HSA_ENABLE_SDMA=0' >> ~/.bashrc
-    echo 'export GPU_MAX_HEAP_SIZE=100' >> ~/.bashrc
-    echo 'export GPU_MAX_ALLOC_PERCENT=100' >> ~/.bashrc
-    echo 'export GPU_SINGLE_ALLOC_PERCENT=100' >> ~/.bashrc
-    echo "Added performance tuning variables to ~/.bashrc"
+# Step 8: Verification — enumerate the GPU and confirm gfx1151 kernels shipped
+echo "Step 8: Verifying ROCm install"
+
+echo "  -- rocm-smi (one-line GPU enumeration):"
+if [ -x /opt/rocm/bin/rocm-smi ]; then
+    /opt/rocm/bin/rocm-smi | grep -E "Device|^[0-9]" | head -5
 else
-    echo "Performance tuning variables already in ~/.bashrc"
+    echo "  WARN: /opt/rocm/bin/rocm-smi not found"
 fi
 echo ""
 
-# Step 7: Install OpenCL runtime
-echo "Step 7: Installing OpenCL runtime..."
-sudo apt install -y ocl-icd-opencl-dev
-echo ""
-
-# Step 8: Install MIOpen for deep learning
-echo "Step 8: Installing MIOpen for deep learning..."
-sudo apt install -y miopen-hip miopengemm
-echo ""
-
-# Step 9: Verification
-echo "Step 9: Verifying ROCm installation..."
-echo "Waiting for GPU to initialize..."
-sleep 5
-
-if [ -f /opt/rocm/bin/rocminfo ]; then
-    echo "Running rocminfo..."
-    /opt/rocm/bin/rocminfo | head -20
+echo "  -- rocminfo (gfx target):"
+if [ -x /opt/rocm/bin/rocminfo ]; then
+    /opt/rocm/bin/rocminfo | grep -E "Name:.*gfx|Marketing Name:" | head -10
 else
-    echo "Warning: rocminfo not found"
+    echo "  WARN: /opt/rocm/bin/rocminfo not found"
 fi
-
 echo ""
-echo "Running rocm-smi..."
-if [ -f /opt/rocm/bin/rocm-smi ]; then
-    /opt/rocm/bin/rocm-smi
+
+echo "  -- rocBLAS gfx1151 Tensile kernels (proof Strix Halo math kernels are shipped):"
+if compgen -G "/opt/rocm/lib/rocblas/library/*gfx1151*" > /dev/null; then
+    ls /opt/rocm/lib/rocblas/library/ | grep gfx1151 | head -5
+    echo "  ✓ gfx1151 kernels present"
 else
-    echo "Warning: rocm-smi not found"
+    echo "  WARN: No gfx1151 kernels found in rocBLAS library — Strix Halo may be unsupported in this ROCm version."
 fi
-
 echo ""
+
 echo "=========================================="
-echo "ROCm Installation Complete!"
+echo "ROCm Installation Complete"
 echo "=========================================="
 echo ""
-echo "IMPORTANT NEXT STEPS:"
-echo "1. Log out and log back in for group changes to take effect"
-echo "2. Reload your shell configuration: source ~/.bashrc"
-echo "3. Run the GPU test: ./tests/test-gpu.sh"
-echo "4. Install Ollama: ./scripts/install-ollama.sh"
+echo "NEXT STEPS:"
+echo "  1. Re-login (or open a new shell) so $USER's video+render groups take effect."
+echo "  2. Reload shell env: 'source ~/.shell_env' (or ~/.bashrc)."
+echo "  3. Run: ./scripts/install-ollama.sh"
+echo "  4. Test: ./tests/test-gpu.sh"
+echo ""
+echo "Known issue (gfx1151): amd-smi reports N/A for most monitoring metrics."
+echo "Workaround: use rocm-smi instead. ROCm issue tracker: ROCm/ROCm#6035."
 echo ""
