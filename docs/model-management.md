@@ -1,6 +1,14 @@
 # Model Management Guide
 
-AI model download, management, and optimization for the Corsair AI workstation.
+> ⚠️ **OLLAMA-CENTRIC — NOT THE NODE-6 STORY (since 2026-05-15).** On Node-6, model storage is governed by **llama.cpp GGUF pulls** + **ComfyUI safetensors pulls** (imagegen-sandbox), not Ollama. See [`../README.md` § "Inference runtime choice"](../README.md#inference-runtime-choice-2026-05-15--supersedes-ollama-plan).
+>
+> Live Node-6 model paths:
+> - LLM (GGUF): `~/dev/local-ai/models/` (Qwen 3.6 35B-A3B served by llama-server `:8001`)
+> - Image gen (safetensors): `~/dev/imagegen-sandbox/models/{diffusion_models,vae,text_encoders,...}/`
+>
+> SEA-ARC-6TB is **not currently mounted** as `/run/media/dj/SEA-ARC-6TB/ai-models`; that was the original plan and the env-var examples below still reference it. Update or ignore those paths until the drive is plugged in. This doc is retained for fleet boxes that still use the Ollama+external-drive layout (Node-2).
+
+AI model download, management, and optimization for AMD GPU boxes — historical/other-node reference.
 
 ## Model Storage Configuration
 

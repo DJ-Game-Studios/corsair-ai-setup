@@ -1,6 +1,10 @@
 # Ollama Setup Guide
 
-Ollama installation and configuration for the Corsair AI workstation with AMD GPU acceleration.
+> ⚠️ **NOT THE RUNTIME ON NODE-6 (since 2026-05-15).** This doc was written before bring-up. Node-6's primary LLM runtime is **llama.cpp `llama-server` + Vulkan/RADV on `:8001`**, not Ollama (bundled llama.cpp in Ollama can't load the `qwen35` architecture we serve). See [`../README.md` § "Inference runtime choice"](../README.md#inference-runtime-choice-2026-05-15--supersedes-ollama-plan) and [`local-ai/docs/plans/llama-cpp-strix-halo.md`](https://github.com/DJ-Game-Studios/local-ai/blob/main/docs/plans/llama-cpp-strix-halo.md).
+>
+> The instructions below are retained for **other fleet boxes** (Node-2 currently uses Ollama) and as historical reference. **Do not run `install-ollama.sh` on Node-6.**
+
+Ollama installation and configuration for AMD GPU boxes via ROCm. Originally written for the Corsair AI workstation (Node-6); now applies to **other fleet nodes** running Ollama.
 
 ## Why Ollama?
 
