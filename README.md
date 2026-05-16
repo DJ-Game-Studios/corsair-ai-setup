@@ -6,6 +6,8 @@ Dedicated setup and configuration repository for the Corsair AI workstation (Nod
 
 **Purpose:** High-performance AI workstation for 70B+ parameter model inference and training
 
+**Status (as of 2026-05-16):** Node-6 is **LIVE**. ROCm 7.2.3 + Mesa/RADV installed and verified (see [`install-rocm.sh`](scripts/install-rocm.sh)). Primary inference is **llama.cpp `llama-server` + Vulkan/RADV** serving Qwen 3.6 35B-A3B on `:8001` (NOT Ollama — see "Inference runtime choice" below). The repo's setup automation is partially superseded by what's now documented in [`local-ai/HOST_STATUS.md`](https://github.com/DJ-Game-Studios/local-ai/blob/main/HOST_STATUS.md) and [`local-ai/docs/plans/llama-cpp-strix-halo.md`](https://github.com/DJ-Game-Studios/local-ai/blob/main/docs/plans/llama-cpp-strix-halo.md).
+
 ## Quick Start
 
 ```bash
@@ -111,7 +113,23 @@ This workstation uses AMD's unified memory architecture, which means:
 - No traditional VRAM bottleneck
 - GPU can dynamically allocate up to 112GB from 128GB total
 - ROCm drivers required (not CUDA)
-- Ollama with ROCm backend for AMD GPU acceleration
+- **Inference runtime: llama.cpp + Vulkan/RADV** (NOT Ollama). See "Inference runtime choice" below.
+
+## Inference runtime choice (2026-05-15 — supersedes Ollama plan)
+
+Originally this repo's Quick Start pointed at Ollama. That's no longer the recommended path on Node-6. Vetoed during bring-up:
+
+- **Ollama** — bundled llama.cpp can't load the `qwen35` architecture (the Qwen 3.6 35B-A3B GGUF won't deserialize).
+- **vLLM on ROCm** — `rocm/vllm:latest` targets MI300 not gfx1151; RDNA 3.5 lacks hardware FP8; bundled transformers pinned <5.0. Full failure log in [`local-ai/docs/plans/vllm-on-rocm-corsair.md`](https://github.com/DJ-Game-Studios/local-ai/blob/main/docs/plans/vllm-on-rocm-corsair.md).
+
+What we run instead — **llama.cpp `llama-server` + Vulkan/RADV** on `:8001`, OpenAI-compatible API, systemd user unit:
+- ~64 t/s decode, ~200 t/s prefill on tiny prompts
+- Community-validated stack; ~2.5× faster than the best vLLM-on-gfx1151 community fork
+- Cross-fleet reachable via Tailscale MagicDNS (`http://dj-node-6.tail1a1945.ts.net:8001/v1`)
+
+Full setup + tuning notes: [`local-ai/docs/plans/llama-cpp-strix-halo.md`](https://github.com/DJ-Game-Studios/local-ai/blob/main/docs/plans/llama-cpp-strix-halo.md).
+
+This repo's `install-ollama.sh` is retained for fleet boxes that still want Ollama (Node-2 currently does), but **don't run it on Node-6** — it'll conflict on storage paths and is the wrong choice for the Qwen 3.6 35B-A3B GGUF we actually serve.
 
 ## Network Integration
 
@@ -141,5 +159,5 @@ For issues or questions about this setup, refer to:
 
 ---
 
-**Status:** PLANNED - Hardware acquired, awaiting OS installation
-**Last Updated:** 2026-05-10
+**Status:** LIVE (since 2026-05-15) - Ubuntu 26.04 installed, ROCm 7.2.3 verified, llama-server :8001 serving Qwen 3.6 35B-A3B
+**Last Updated:** 2026-05-16
